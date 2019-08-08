@@ -1,4 +1,4 @@
-#### League of Legends Internal Fiesta (duh)
+# League of Legends Internal Fiesta (duh)
 
 ## Features
 - Injector provided with the solution
