@@ -1,8 +1,10 @@
-# lol-internal-fiesta
-League of Legends simple internal hack
+#### League of Legends Internal Fiesta (duh)
 
-## Outdated
-The offsets and memory addresses are currently outdated, since I don't have much time.
-You can always check the current version in Offsets.h -> TARGET_GAMEVERSION
+## Features
+- Injector provided with the solution
+- Simple internal base (find the offsets yourself)
+- Looping through all game objects, finding dragon|baron|herald and auto smiting
+- Basic functionality for working with game objects
 
-Also an injector is provided with the project.
+## Outdated Offsets
+The offsets and memory addresses are currently outdated, I will never be updating them. Get creative :)
