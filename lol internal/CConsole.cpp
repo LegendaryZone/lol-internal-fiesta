@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <iostream>
 #include "CConsole.h"
+#include "XorCompileTime.h"
 
 using namespace std;
 
@@ -20,10 +21,10 @@ void CConsole::startConsole()
 		}
 	}
 
-	freopen_s((FILE**)stdin, "CONIN$", "r", stdin);   // ----------------------------------------------
-	freopen_s((FILE**)stdout, "CONOUT$", "w", stdout);  //  Make iostream library use our console handle
+	freopen_s((FILE**)stdin, XorStr("CONIN$"), "r", stdin);   // ----------------------------------------------
+	freopen_s((FILE**)stdout, XorStr("CONOUT$"), "w", stdout);  //  Make iostream library use our console handle
 														// ----------------------------------------------
-	SetConsoleTitleA("Konzolka");   // Set console name to a custom one
+	SetConsoleTitleA(XorStr("Konzolka"));   // Set console name to a custom one
 }
 
 void CConsole::stopConsole()

@@ -16,7 +16,7 @@ public:
 
 	float GetCD()
 	{
-		return *(float*)((DWORD)this + 0x18);
+		return *(float*)((DWORD)this + 0x78);
 	}
 
 	/*bool IsReady()

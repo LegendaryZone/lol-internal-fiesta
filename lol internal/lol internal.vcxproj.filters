@@ -80,5 +80,8 @@
     <ClCompile Include="CConsole.cpp">
       <Filter>Source Files\Base</Filter>
     </ClCompile>
+    <ClCompile Include="XorCompileTime.h">
+      <Filter>Header Files\Utils</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

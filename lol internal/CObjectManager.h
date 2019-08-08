@@ -7,22 +7,22 @@ class CObjectManager
 public:
 	CObject** GetObjectArray()
 	{
-		return *(CObject***)((DWORD)this + 0x8);
+		return *(CObject***)((DWORD)this + 0x4);
 	}
 
 	int GetMaxObjects()
 	{
-		return *(int*)((DWORD)this + 0xC);
+		return *(int*)((DWORD)this + 0x8);
 	}
 
 	int GetObjectsUsed()
 	{
-		return *(int*)((DWORD)this + 0x10);
+		return *(int*)((DWORD)this + 0xC);
 	}
 
 	int GetHighestObjectID()
 	{
-		return *(int*)((DWORD)this + 0x14);
+		return *(int*)((DWORD)this + 0x10);
 	}
 };
 extern CObjectManager* ObjManager;

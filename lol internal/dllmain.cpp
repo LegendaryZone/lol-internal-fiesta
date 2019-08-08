@@ -3,6 +3,7 @@
 #include "CConsole.h"
 #include "Engine.h"
 #include "Hooks.h"
+#include "XorCompileTime.h"
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -16,16 +17,27 @@ void __stdcall Start(HMODULE base)
 {
 	Console.startConsole();
 
+    printf(XorStr("Console initiated...\n"));
+
 	if (strcmp(GetGameVersion(), TARGET_GAMEVERSION) != 0)
 	{
-		printf("Game version changed from %s to %s\n", TARGET_GAMEVERSION, GetGameVersion());
+		printf(XorStr("Game version changed from %s to %s\n"), TARGET_GAMEVERSION, GetGameVersion());
 		Sleep(5 * 1000);
 		DetachDll(base);
 	}
 
+    int maxRetry = 3;
+    int retries = 0;
 	while (Engine::GetGameTime() < 1.0f || !me)
 	{
-		Sleep(10);
+        if (retries >= maxRetry)
+        {
+            DetachDll(base);
+        }
+
+        printf(XorStr("Game not started or localplayer not found.\nLocalPlayer: 0x%0x\nRetry %d of %d...\n"), (DWORD)me, retries, maxRetry);
+        retries++;
+		Sleep(4 * 1000);
 	}
 
 	//////////////////////////////////////////////////////////////////////////////////////////
@@ -58,29 +70,28 @@ void __stdcall Start(HMODULE base)
 
 	if (ObjManager == NULL)
 	{
-		printf("ObjMgr is dead.\n");
+		printf(XorStr("ObjMgr is dead.\n"));
 		Sleep(5 * 1000);
 		DetachDll(base);
 	}
 
 	if (me)
 	{
-		printf("Press 'del' to exit.\n");
-		printf("Local player's name: %s | Champion: %s | Address: 0x%0x\n", me->GetName(), me->GetChampionName(), (DWORD)me);
-		printf("Game version: %s\n", GetGameVersion());
+		printf(XorStr("Press 'del' to exit.\n"));
+		printf(XorStr("Local player's name: %s | Champion: %s | Address: 0x%0x\n"), me->GetName(), me->GetChampionName(), (DWORD)me);
+		printf(XorStr("Game version: %s\n"), GetGameVersion());
 	}
 
 	///////////////////////////// Spells section ///////////////////////////////////////////////
 
-	bool smiteToggle = true;
-	const int smiteSlot = 4;
+	bool smiteToggle = false;
 
-	auto Q = me->GetSpellBook()->GetSpellSlotByID(0);
-	auto W = me->GetSpellBook()->GetSpellSlotByID(1);
-	auto E = me->GetSpellBook()->GetSpellSlotByID(2);
-	auto R = me->GetSpellBook()->GetSpellSlotByID(3);
-	auto D = me->GetSpellBook()->GetSpellSlotByID(smiteSlot);
-	auto F = me->GetSpellBook()->GetSpellSlotByID(5);
+	CSpellSlot* Q = me->GetSpellBook()->GetSpellSlotByID(Spell::Q);
+    CSpellSlot* W = me->GetSpellBook()->GetSpellSlotByID(Spell::W);
+    CSpellSlot* E = me->GetSpellBook()->GetSpellSlotByID(Spell::E);
+    CSpellSlot* R = me->GetSpellBook()->GetSpellSlotByID(Spell::R);
+    CSpellSlot* D = me->GetSpellBook()->GetSpellSlotByID(Spell::D);
+    CSpellSlot* F = me->GetSpellBook()->GetSpellSlotByID(Spell::F);
 
 	auto lastCheck = Clock::now();
 	// seconds
@@ -90,10 +101,10 @@ void __stdcall Start(HMODULE base)
 
 	while (!GetAsyncKeyState(VK_DELETE))
 	{
-		if (GetAsyncKeyState(VK_MBUTTON) & 0x1)
+		if (GetAsyncKeyState(VK_INSERT) & 0x1)
 		{
 			smiteToggle = !smiteToggle;
-			printf("Smite is %s\n", smiteToggle ? "ON" : "OFF");
+			printf(XorStr("Smite is %s\n"), smiteToggle ? XorStr("ON") : XorStr("OFF"));
 		}
 
 		if (!smiteToggle) continue;
@@ -106,13 +117,13 @@ void __stdcall Start(HMODULE base)
 
 			CObject* obj = Engine::GetObjectByID(i);
 
-			if (obj && obj->IsMinion() && (obj->IsDragon() || obj->IsBaron()))
+			if (obj && obj->IsMinion() && (obj->IsDragon() || obj->IsBaron() || (obj->GetMaxHealth() == 10000.0f)/*Herald health*/))
 			{
 				// if object is too far
 				if (obj->GetPos().DistTo(me->GetPos()) > minDist)
 					continue;
 
-				printf("Object name:%s | Object HP:%.2f | Object index:%d | Object dist to me:%.2f\n", obj->GetName(), obj->GetHealth(), i, obj->GetPos().DistTo(me->GetPos()));
+				printf(XorStr("Object name:%s | Object HP:%.2f | Object index:%d | Object dist to me:%.2f\n"), obj->GetChampionName(), obj->GetHealth(), i, obj->GetPos().DistTo(me->GetPos()));
 				monsterIndex = i;
 				lastCheck = Clock::now();
 				break;
@@ -121,9 +132,10 @@ void __stdcall Start(HMODULE base)
 
 		CObject* monster = Engine::GetObjectByID(monsterIndex);
 
-		if (monster && (monster->GetHealth() <= D->GetSpellTrueDamage()))
+        if (monster && monster->IsAlive() && (monster->GetHealth() <= D->GetSpellTrueDamage()))
 		{
-			Engine::CastSpellTargetted(smiteSlot, monster);
+			Engine::CastSpellTargetted(Spell::D, monster);
+            printf(XorStr("Casted\n"));
 		}
 
 		Sleep(1);
